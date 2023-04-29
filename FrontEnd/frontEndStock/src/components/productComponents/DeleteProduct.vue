@@ -2,7 +2,7 @@
   <div class="col" style="max-width: 50em">
     <q-card style="width: 700px; max-width: 80vw">
       <q-card-section>
-        <div class="text-h6">Deletar</div>
+        <div class="text-h6">Delete</div>
       </q-card-section>
 
       <q-card-section class="q-pt-none">
@@ -17,8 +17,9 @@
   </div>
 </template>
 <script>
-import { defineComponent } from 'vue';
+import { defineComponent, onMounted } from 'vue';
 import { useProductStore } from 'src/stores/ProductStore';
+import { useQuasar } from 'quasar';
 export default defineComponent({
   props: {
     id: {
@@ -26,14 +27,44 @@ export default defineComponent({
       required: true,
     },
   },
-  setup(props) {
+  setup(props, { emit }) {
+    const $q = useQuasar();
     const productStore = useProductStore();
+    const enterclick = () => {
+      console.log('foi clicado');
+    };
+    onMounted(() => {
+      window.addEventListener('keyup', function (event) {
+        if (event.key == 'Enter') {
+          remove();
+        }
+      });
+    });
     const remove = () => {
-      productStore.deleteProduct(props.id);
+      productStore
+        .deleteProduct(props.id)
+        .then(() => {
+          emit('close');
+          $q.notify({
+            color: 'orange',
+            textColor: 'white',
+            icon: 'delete_forever',
+            message: 'Product deleted',
+          });
+        })
+        .catch(() => {
+          $q.notify({
+            color: 'red',
+            textColor: 'white',
+            icon: 'error',
+            message: 'Product deleted',
+          });
+        });
     };
 
     return {
       remove,
+      enterclick,
     };
   },
 });
