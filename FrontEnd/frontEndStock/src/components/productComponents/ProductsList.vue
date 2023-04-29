@@ -12,7 +12,7 @@
         <q-btn
           color="primary"
           icon-right="add"
-          label="Adicionar"
+          label="Add"
           no-caps
           @click="adicionaItem"
         />
@@ -38,10 +38,13 @@
             {{ props.row.unitValue }}
           </q-td>
           <q-td key="createDate" :props="props">
-            {{ props.row.createDate }}
+            {{ formatCreateDate(props.row.createDate) }}
           </q-td>
           <q-td key="status" :props="props">
-            {{ props.row.status }}
+            <q-icon size="sm" color="green" v-if="props.row.status" name="done">
+            </q-icon>
+            <q-icon size="sm" color="red" v-if="!props.row.status" name="close">
+            </q-icon>
           </q-td>
           <q-td key="Action" :props="props">
             <div class="q-pa-sm q-gutter-sm">
@@ -65,23 +68,24 @@
       </template>
     </q-table>
     <q-dialog v-model="openAddProduct">
-      <AddProduct />
+      <AddProduct @close="openAddProduct = false" />
     </q-dialog>
     <q-dialog v-model="openEditProduct">
-      <EditProduct :id="id" />
+      <EditProduct @close="openEditProduct = false" :id="id" />
     </q-dialog>
     <q-dialog v-model="openDeleteProduct">
-      <DeleteProduct :id="id" />
+      <DeleteProduct @close="openDeleteProduct = false" :id="id" />
     </q-dialog>
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { computed, defineComponent, onMounted, ref } from 'vue';
 import { useProductStore } from 'src/stores/ProductStore';
 import AddProduct from './AddProduct.vue';
 import EditProduct from './EditProduct.vue';
 import DeleteProduct from './DeleteProduct.vue';
+import { formatDate } from 'src/Utils/Utils';
 export default defineComponent({
   components: { AddProduct, EditProduct, DeleteProduct },
   setup() {
@@ -89,68 +93,78 @@ export default defineComponent({
     const openAddProduct = ref(false);
     const openEditProduct = ref(false);
     const openDeleteProduct = ref(false);
+
     const id = ref(0);
-    const columns = [
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const columns: any = [
       {
         name: 'id',
-        required: true,
         label: 'id',
-        align: 'left',
-        field: (row) => row.id,
-        format: (val) => `${val}`,
+        align: 'center',
+        field: 'id',
         sortable: true,
       },
       {
         name: 'name',
-        align: 'center',
         label: 'Name',
+        align: 'center',
         field: 'name',
         sortable: true,
       },
       {
         name: 'description',
-        align: 'center',
         label: 'Description',
+        align: 'center',
         field: 'description',
         sortable: true,
       },
-      { name: 'type', align: 'center', label: 'Type', field: 'type' },
+      {
+        name: 'type',
+        label: 'Type',
+        align: 'center',
+        field: 'type',
+        sortable: true,
+      },
       {
         name: 'quantity',
-        align: 'center',
         label: 'Quantity',
+        align: 'center',
         field: 'quantity',
+        sortable: true,
       },
       {
         name: 'unitValue',
-        align: 'center',
         label: 'Unit Value',
+        align: 'center',
         field: 'unitValue',
+        sortable: true,
       },
       {
         name: 'createDate',
         label: 'Create Date',
+        align: 'center',
         field: 'createDate',
         sortable: true,
-        align: 'center',
-        sort: (a, b) => parseInt(a, 10) - parseInt(b, 10),
       },
       {
         name: 'status',
         label: 'status',
-        field: 'status',
         align: 'center',
+        field: 'status',
         sortable: true,
-        sort: (a, b) => parseInt(a, 10) - parseInt(b, 10),
       },
       {
         name: 'Action',
         label: 'Action',
-        field: 'Action',
         align: 'center',
+        field: 'Action',
+        sortable: false,
       },
     ];
-    const rows = [];
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const rows: any = [];
+
     onMounted(() => {
       productStore.fetchProducts();
     });
@@ -158,13 +172,17 @@ export default defineComponent({
     const adicionaItem = () => {
       openAddProduct.value = true;
     };
-    const editar = (objectId) => {
+    const editar = (objectId: number) => {
       id.value = objectId;
       openEditProduct.value = true;
     };
-    const remove = (objectId) => {
+    const remove = (objectId: number) => {
       id.value = objectId;
       openDeleteProduct.value = true;
+    };
+    const formatCreateDate = (createDate: Date) => {
+      const date = new Date(createDate);
+      return formatDate(date);
     };
 
     return {
@@ -178,6 +196,7 @@ export default defineComponent({
       adicionaItem,
       editar,
       remove,
+      formatCreateDate,
     };
   },
 });
