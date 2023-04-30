@@ -17,7 +17,7 @@
   </div>
 </template>
 <script>
-import { defineComponent, onMounted } from 'vue';
+import { defineComponent } from 'vue';
 import { useProductStore } from 'src/stores/ProductStore';
 import { useQuasar } from 'quasar';
 export default defineComponent({
@@ -33,13 +33,6 @@ export default defineComponent({
     const enterclick = () => {
       console.log('foi clicado');
     };
-    onMounted(() => {
-      window.addEventListener('keyup', function (event) {
-        if (event.key == 'Enter') {
-          remove();
-        }
-      });
-    });
     const remove = () => {
       productStore
         .deleteProduct(props.id)
@@ -57,7 +50,7 @@ export default defineComponent({
             color: 'red',
             textColor: 'white',
             icon: 'error',
-            message: 'Product deleted',
+            message: 'Failed in delete',
           });
         });
     };
